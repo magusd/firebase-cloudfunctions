@@ -33,3 +33,34 @@ exports.addRequest = functions.https.onCall((data, context) => {
     });
 
 });
+
+exports.upvote = functions.https.onCall((data, context) => {
+    //check auth
+    if(!context.auth){
+        throw new functions.https.HttpsError(
+            'unauthenticated',
+            'only authenticated users can add requests'
+            );
+    }
+    const user = admin.firestore().collection('users').doc(context.auth.uid);
+    const request = admin.firestore().collection('requests').doc(data.id);
+
+    return user.get().then( doc => {
+        // check if the user hasn't upvoted
+        if(doc.data().upvotedOn.includes(data.id)){
+            throw new functions.https.HttpsError(
+                'failed-precondition',
+                'You can only upvote a request once'
+            );       
+        }
+        //update user array
+        return user.update({
+            upvotedOn: [...doc.data().upvotedOn, data.id]
+        })
+    }).then( () => {
+        //updates votes on the request
+        return request.update({upvotes: admin.firestore.FieldValue.increment(1)
+        });
+    });
+    
+})

@@ -19,7 +19,8 @@ requestForm.addEventListener('submit', e => {
     const addRequest = firebase.functions().httpsCallable('addRequest');
 
     addRequest({
-        text: requestForm['request'].value
+        text: requestForm['request'].value,
+        upvotes: 0
     })
     .then(()=>{
         requestForm.reset();
