@@ -8,7 +8,10 @@ var app = new Vue({
             const upvote = firebase.functions().httpsCallable('upvote');
             upvote({ id }).then(
                 ()=>{},
-                error=>{console.log(error.message)}
+                error=>{
+                    console.log(error.message);
+                    showNotification(error.message);
+                }
             )
         }
     },
@@ -24,3 +27,14 @@ var app = new Vue({
         
     }
 });
+
+
+const notification = document.querySelector('.notification');
+const showNotification = (message) => {
+    notification.textContent = message;
+    notification.classList.add('active');
+    setTimeout(()=>{
+        notification.classList.remove('active');
+        notification.textContent = '';
+    }, 2000)
+}
